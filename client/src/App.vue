@@ -7,6 +7,23 @@
         <span class="font-weight-light">List</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
+      
+        <v-toolbar-title class="text-uppercase">Drop Down</v-toolbar-title>
+<!-- v-select sends item-text="name.fullname" however it is better to send an entire 
+friend by indiced json.                                                              -->
+        <v-select 
+        v-model="selectedLogIn"
+        :items="friends" 
+        item-text="name.fullname" 
+        item-value="" 
+        single-line 
+        menu-props="auto"
+        prepend-icon="group_work" 
+        label="Select your friend"
+        >
+        </v-select>
+<!-- ******************************************************************************* -->
+
       <v-tooltip left>
         <v-btn @click="meetSomeone('male')" slot="activator" icon class="white--text">
           <v-icon>fa-mars</v-icon>
@@ -23,6 +40,24 @@
     </v-toolbar>
     <v-content>
       <FriendList v-bind:friends="friends"/>
+      <br>
+      <v-layout text-xs-center wrap>
+        <v-flex mb-4>
+          <v-card>
+          <li>
+<!-- The button to run testFriend to see the data by alert.   -->
+            <v-btn 
+            @click="testFriend(selectedLogIn, friends)" 
+            slot="activator" 
+            icon class="black--text">{{ selectedLogIn }}</v-btn>
+<!-- Dear Felipe, I try to send an entire friend json to run a module FriendDetail,     
+would you please show me how to do so? 12.13,Thursday by Yuriko                 -->
+              <FriendDetail :selectedLogIn ='selectedLogIn'/>
+<!-- ******************************************************************************* -->
+          </li>
+          </v-card>
+        </v-flex>
+      </v-layout>
     </v-content>
     <v-snackbar
       v-model="snackbar"
@@ -40,12 +75,17 @@
 
 <script>
 import FriendList from "./components/FriendList";
+import FriendDetail from "./components/FriendDetail";
 import axios from "axios";
 
 export default {
   name: "App",
+  props: {
+    friend: Array
+  },
   components: {
-    FriendList
+    FriendList,
+    FriendDetail
   },
 
   data() {
@@ -57,7 +97,8 @@ export default {
       mode: "",
       timeout: 3000,
       text: "",
-      toast: ""
+      toast: "",
+      selectedLogIn: ""
     };
   },
 
@@ -76,6 +117,8 @@ export default {
               "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2UiOiJkZW1vIiwiaWF0IjoxNTQ0MTMzNjc2fQ.bMZTSEdftqNjzlkRBDF9fuFJWPd5tv3x84ATVPxjVuE"
           }
         });
+        //** Add fullName to the each friend, so that will show on v-select option. **/
+        data.friend.name['fullname'] = data.friend.name.first+' '+data.friend.name.last;
         this.friends.push(data.friend);
         window.localStorage.setItem("friends", JSON.stringify(this.friends));
       } catch (error) {
@@ -83,6 +126,15 @@ export default {
         this.text = `An error has ocurred: ${error.message}`;
         this.snackbar = true;
       }
+    },
+    testFriend(selectedLogIn,friends){
+      //** Since I failed to grab the friend json, I tried to studay how the data was sent from v-select. **/
+      var test = friends[friends.map(
+        function(e){
+          return e.name.first+' '+e.name.last;
+        }).indexOf(selectedLogIn)];
+      alert(test.name.first);
+      return test;
     }
   },
 
